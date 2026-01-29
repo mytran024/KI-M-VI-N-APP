@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Vessel, Shift, TallyReport, TallyItem, Container, MechanicalDetail } from '../types';
 import { MOCK_CONTAINERS, MOCK_WORKERS, MOCK_DRIVERS, MOCK_TRANSPORT_VEHICLES, MOCK_CUSTOMS_SEALS, HANDLING_METHODS, MOCK_EXTERNAL_UNITS } from '../constants';
@@ -449,13 +448,13 @@ const TallyReportView: React.FC<TallyReportViewProps> = ({ vessel, shift, mode, 
   const pendingItems = (currentReport.items || []).filter((i: TallyItem) => !isItemComplete(i));
   const completedItems = (currentReport.items || []).filter((i: TallyItem) => isItemComplete(i));
   
-  const renderItemCard = (item: TallyItem, _idx: number, isComplete: boolean) => {
+  const renderItemCard = (item: TallyItem, idx: number, isComplete: boolean) => {
     const minPhotos = mode === 'NHAP' ? 5 : 1;
     const currentPhotoCount = item.photos?.length || 0;
     const isPhotoValid = currentPhotoCount >= minPhotos;
 
     return (
-    <div key={item.contId} className={`p-4 bg-white rounded-2xl border shadow-sm space-y-4 transition-all ${isComplete ? 'border-green-200 bg-green-50/20' : 'border-blue-200 shadow-md ring-1 ring-blue-100'}`}>
+    <div key={item.contId + idx} className={`p-4 bg-white rounded-2xl border shadow-sm space-y-4 transition-all ${isComplete ? 'border-green-200 bg-green-50/20' : 'border-blue-200 shadow-md ring-1 ring-blue-100'}`}>
       <div className="flex justify-between items-center">
         <span className={`text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-tight ${isComplete ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'}`}>
           {isComplete ? '✓ Đã xong:' : '✎ Đang nhập:'} {item.contNo}
@@ -470,12 +469,12 @@ const TallyReportView: React.FC<TallyReportViewProps> = ({ vessel, shift, mode, 
         <div>
           <label className="text-[9px] font-black text-gray-400 uppercase">Số kiện <span className="text-red-500">*</span></label>
           <input type="number" min="0" className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl font-black text-sm outline-none focus:bg-white focus:ring-2 focus:ring-blue-100" 
-            value={item.actualUnits} onChange={e => updateItem(item.contId, 'actualUnits', Math.max(0, parseInt(e.target.value) || 0))} />
+            value={item.actualUnits} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(item.contId, 'actualUnits', Math.max(0, parseInt(e.target.value) || 0))} />
         </div>
         <div>
           <label className="text-[9px] font-black text-gray-400 uppercase">Trọng lượng (TẤN) <span className="text-red-500">*</span></label>
           <input type="number" min="0" step="0.1" className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl font-black text-sm outline-none focus:bg-white focus:ring-2 focus:ring-blue-100" 
-            value={item.actualWeight} onChange={e => updateItem(item.contId, 'actualWeight', Math.max(0, parseFloat(e.target.value) || 0))} />
+            value={item.actualWeight} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(item.contId, 'actualWeight', Math.max(0, parseFloat(e.target.value) || 0))} />
         </div>
       </div>
 
@@ -488,7 +487,7 @@ const TallyReportView: React.FC<TallyReportViewProps> = ({ vessel, shift, mode, 
                     min="0"
                     className="w-full p-3 bg-white border border-blue-100 rounded-xl font-bold text-sm outline-none focus:ring-1 focus:ring-blue-200"
                     value={item.sealCount || 0}
-                    onChange={e => updateItem(item.contId, 'sealCount', Math.max(0, parseInt(e.target.value) || 0))}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(item.contId, 'sealCount', Math.max(0, parseInt(e.target.value) || 0))}
                 />
             </div>
             {item.sealCount && item.sealCount > 0 ? (
@@ -558,16 +557,24 @@ const TallyReportView: React.FC<TallyReportViewProps> = ({ vessel, shift, mode, 
         </div>
       </div>
 
+      {currentReport.mode !== 'XUAT' && (
+          <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
+            <input type="checkbox" id={`scratch-${item.contId}`} className="w-5 h-5 rounded border-gray-300 text-blue-600" checked={item.isScratchedFloor} 
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(item.contId, 'isScratchedFloor', e.target.checked)} />
+            <label htmlFor={`scratch-${item.contId}`} className="text-xs font-black text-gray-700 uppercase">SÀN BỊ XƯỚC</label>
+          </div>
+      )}
+
       <div className="grid grid-cols-2 gap-3">
         <div>
             <label className="text-[9px] font-black text-red-500 uppercase">Số kiện rách</label>
             <input type="number" min="0" className="w-full p-3 bg-gray-50 border border-red-50 rounded-xl font-black text-sm text-red-600 outline-none focus:bg-white focus:ring-2 focus:ring-red-100" 
-              value={item.tornUnits} onChange={e => updateItem(item.contId, 'tornUnits', Math.max(0, parseInt(e.target.value) || 0))} />
+              value={item.tornUnits} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(item.contId, 'tornUnits', Math.max(0, parseInt(e.target.value) || 0))} />
         </div>
         <div>
             <label className="text-[9px] font-black text-gray-400 uppercase">Ghi chú khác</label>
             <input className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl font-bold text-[11px] outline-none focus:bg-white focus:ring-2 focus:ring-blue-100" 
-              value={item.notes} onChange={e => updateItem(item.contId, 'notes', e.target.value)} />
+              value={item.notes} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(item.contId, 'notes', e.target.value)} />
         </div>
       </div>
     </div>
@@ -594,7 +601,7 @@ const TallyReportView: React.FC<TallyReportViewProps> = ({ vessel, shift, mode, 
                 <div className="col-span-1">
                     <label className="text-[9px] font-black text-gray-400 uppercase">Số lượng</label>
                     <input type="number" min="0" className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl font-bold text-sm outline-none"
-                    value={currentReport.workerCount} onChange={e => setCurrentReport((prev: Partial<TallyReport>) => ({...prev, workerCount: parseInt(e.target.value) || 0}))} />
+                    value={currentReport.workerCount} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentReport((prev: Partial<TallyReport>) => ({...prev, workerCount: parseInt(e.target.value) || 0}))} />
                 </div>
                 <div className="col-span-2">
                      <label className="text-[9px] font-black text-gray-400 uppercase">Danh sách nhân sự</label>
@@ -705,17 +712,17 @@ const TallyReportView: React.FC<TallyReportViewProps> = ({ vessel, shift, mode, 
              <div className="col-span-2">
                 <label className="text-[9px] font-black text-gray-400 uppercase">Thiết bị sử dụng</label>
                 <input className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl font-bold text-sm outline-none"
-                    value={currentReport.equipment} onChange={e => setCurrentReport((prev: Partial<TallyReport>) => ({...prev, equipment: e.target.value}))} />
+                    value={currentReport.equipment} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentReport((prev: Partial<TallyReport>) => ({...prev, equipment: e.target.value}))} />
              </div>
              <div>
                 <label className="text-[9px] font-black text-gray-400 uppercase">Loại xe vận chuyển</label>
                 <input className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl font-bold text-sm outline-none"
-                    value={currentReport.vehicleType} onChange={e => setCurrentReport((prev: Partial<TallyReport>) => ({...prev, vehicleType: e.target.value}))} />
+                    value={currentReport.vehicleType} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentReport((prev: Partial<TallyReport>) => ({...prev, vehicleType: e.target.value}))} />
              </div>
              <div>
                 <label className="text-[9px] font-black text-gray-400 uppercase">Biển số xe</label>
                 <input className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl font-bold text-sm outline-none uppercase"
-                    value={currentReport.vehicleNo} onChange={e => setCurrentReport((prev: Partial<TallyReport>) => ({...prev, vehicleNo: e.target.value}))} />
+                    value={currentReport.vehicleNo} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentReport((prev: Partial<TallyReport>) => ({...prev, vehicleNo: e.target.value}))} />
              </div>
           </div>
         </div>
