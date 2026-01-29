@@ -1,0 +1,7 @@
+{
+  "name": "Copy of kiểm viên",
+  "description": "Ứng dụng di động dành cho kiểm viên để thực hiện quy trình kiểm tra, tạo báo cáo Tally và xác nhận phiếu công tác trong quy trình xuất nhập kho ngoại quan hàng giấy vuông.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
